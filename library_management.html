@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Library Management System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(120deg, #d6eaf8, #aed6f1);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      width: 400px;
+      padding: 25px;
+    }
+    h1 {
+      text-align: center;
+      color: #21618c;
+    }
+    input[type="text"] {
+      width: 90%;
+      padding: 8px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #2e86c1;
+    }
+    .section {
+      margin-top: 15px;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+    li {
+      background: #f8f9f9;
+      margin: 4px 0;
+      padding: 6px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Library System</h1>
+    <input type="text" id="bookTitle" placeholder="Enter book title" />
+    <div>
+      <button onclick="issueBook()">Issue Book</button>
+      <button onclick="returnBook()">Return Book</button>
+    </div>
+
+    <div class="section">
+      <h3>📚 Issued Books (Queue)</h3>
+      <ul id="issuedList"></ul>
+    </div>
+
+    <div class="section">
+      <h3>📕 Returned Books (Stack)</h3>
+      <ul id="returnedList"></ul>
+    </div>
+  </div>
+
+  <script>
+    // Queue for issued books
+    let issuedQueue = [];
+    // Stack for returned books
+    let returnedStack = [];
+
+    function issueBook() {
+      const title = document.getElementById("bookTitle").value.trim();
+      if (title === "") {
+        alert("Enter a book title first!");
+        return;
+      }
+      issuedQueue.push(title);
+      document.getElementById("bookTitle").value = "";
+      displayIssued();
+    }
+
+    function returnBook() {
+      const title = document.getElementById("bookTitle").value.trim();
+      if (title === "") {
+        alert("Enter a book title first!");
+        return;
+      }
+      returnedStack.push(title);
+      document.getElementById("bookTitle").value = "";
+      displayReturned();
+    }
+
+    function displayIssued() {
+      const list = document.getElementById("issuedList");
+      list.innerHTML = "";
+      if (issuedQueue.length === 0) {
+        list.innerHTML = "<li>No issued books.</li>";
+      } else {
+        issuedQueue.forEach((book, i) => {
+          const li = document.createElement("li");
+          li.textContent = (i + 1) + ". " + book;
+          list.appendChild(li);
+        });
+      }
+    }
+
+    function displayReturned() {
+      const list = document.getElementById("returnedList");
+      list.innerHTML = "";
+      if (returnedStack.length === 0) {
+        list.innerHTML = "<li>No returned books.</li>";
+      } else {
+        // Display stack (LIFO: newest first)
+        for (let i = returnedStack.length - 1, n = 1; i >= 0; i--, n++) {
+          const li = document.createElement("li");
+          li.textContent = n + ". " + returnedStack[i];
+          list.appendChild(li);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
