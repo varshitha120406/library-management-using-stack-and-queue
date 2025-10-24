@@ -1,143 +1,148 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Library Management System</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(120deg, #d6eaf8, #aed6f1);
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .container {
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.2);
-      width: 400px;
-      padding: 25px;
-    }
-    h1 {
-      text-align: center;
-      color: #21618c;
-    }
-    input[type="text"] {
-      width: 90%;
-      padding: 8px;
-      margin: 10px 0;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background-color: #3498db;
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin: 5px;
-    }
-    button:hover {
-      background-color: #2e86c1;
-    }
-    .section {
-      margin-top: 15px;
-    }
-    ul {
-      list-style-type: none;
-      padding: 0;
-      max-height: 100px;
-      overflow-y: auto;
-    }
-    li {
-      background: #f8f9f9;
-      margin: 4px 0;
-      padding: 6px;
-      border-radius: 6px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Library System</h1>
-    <input type="text" id="bookTitle" placeholder="Enter book title" />
-    <div>
-      <button onclick="issueBook()">Issue Book</button>
-      <button onclick="returnBook()">Return Book</button>
-    </div>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-    <div class="section">
-      <h3>📚 Issued Books (Queue)</h3>
-      <ul id="issuedList"></ul>
-    </div>
+// Maximum sizes
+#define MAX 50
+#define TITLE_LEN 50
 
-    <div class="section">
-      <h3>📕 Returned Books (Stack)</h3>
-      <ul id="returnedList"></ul>
-    </div>
-  </div>
+// ------------------ QUEUE (Issued Books) ------------------
+typedef struct {
+    char title[TITLE_LEN];
+} Book;
 
-  <script>
-    // Queue for issued books
-    let issuedQueue = [];
-    // Stack for returned books
-    let returnedStack = [];
+typedef struct {
+    Book books[MAX];
+    int front, rear;
+} Queue;
 
-    function issueBook() {
-      const title = document.getElementById("bookTitle").value.trim();
-      if (title === "") {
-        alert("Enter a book title first!");
+void initQueue(Queue *q) {
+    q->front = q->rear = -1;
+}
+
+int isQueueFull(Queue *q) {
+    return q->rear == MAX - 1;
+}
+
+int isQueueEmpty(Queue *q) {
+    return q->front == -1 || q->front > q->rear;
+}
+
+void enqueue(Queue *q, char *title) {
+    if (isQueueFull(q)) {
+        printf("\nQueue is full! Cannot issue more books.\n");
         return;
-      }
-      issuedQueue.push(title);
-      document.getElementById("bookTitle").value = "";
-      displayIssued();
     }
+    if (q->front == -1) q->front = 0;
+    strcpy(q->books[++q->rear].title, title);
+    printf("\nBook \"%s\" issued successfully.\n", title);
+}
 
-    function returnBook() {
-      const title = document.getElementById("bookTitle").value.trim();
-      if (title === "") {
-        alert("Enter a book title first!");
+void displayQueue(Queue *q) {
+    if (isQueueEmpty(q)) {
+        printf("\nNo issued books.\n");
         return;
-      }
-      returnedStack.push(title);
-      document.getElementById("bookTitle").value = "";
-      displayReturned();
     }
+    printf("\n--- Issued Books Queue ---\n");
+    for (int i = q->front; i <= q->rear; i++)
+        printf("%d. %s\n", i - q->front + 1, q->books[i].title);
+}
 
-    function displayIssued() {
-      const list = document.getElementById("issuedList");
-      list.innerHTML = "";
-      if (issuedQueue.length === 0) {
-        list.innerHTML = "<li>No issued books.</li>";
-      } else {
-        issuedQueue.forEach((book, i) => {
-          const li = document.createElement("li");
-          li.textContent = (i + 1) + ". " + book;
-          list.appendChild(li);
-        });
-      }
+// ------------------ STACK (Returned Books) ------------------
+typedef struct {
+    Book books[MAX];
+    int top;
+} Stack;
+
+void initStack(Stack *s) {
+    s->top = -1;
+}
+
+int isStackFull(Stack *s) {
+    return s->top == MAX - 1;
+}
+
+int isStackEmpty(Stack *s) {
+    return s->top == -1;
+}
+
+void push(Stack *s, char *title) {
+    if (isStackFull(s)) {
+        printf("\nStack is full! Cannot return more books.\n");
+        return;
     }
+    strcpy(s->books[++s->top].title, title);
+    printf("\nBook \"%s\" returned successfully.\n", title);
+}
 
-    function displayReturned() {
-      const list = document.getElementById("returnedList");
-      list.innerHTML = "";
-      if (returnedStack.length === 0) {
-        list.innerHTML = "<li>No returned books.</li>";
-      } else {
-        // Display stack (LIFO: newest first)
-        for (let i = returnedStack.length - 1, n = 1; i >= 0; i--, n++) {
-          const li = document.createElement("li");
-          li.textContent = n + ". " + returnedStack[i];
-          list.appendChild(li);
+void displayStack(Stack *s) {
+    if (isStackEmpty(s)) {
+        printf("\nNo returned books.\n");
+        return;
+    }
+    printf("\n--- Returned Books Stack (Most Recent First) ---\n");
+    for (int i = s->top; i >= 0; i--)
+        printf("%d. %s\n", s->top - i + 1, s->books[i].title);
+}
+
+// ------------------ MAIN LIBRARY SYSTEM ------------------
+void menu() {
+    printf("\n============================");
+    printf("\n   LIBRARY MANAGEMENT MENU  ");
+    printf("\n============================");
+    printf("\n1. Issue Book");
+    printf("\n2. Return Book");
+    printf("\n3. View Issued Books (Queue)");
+    printf("\n4. View Returned Books (Stack)");
+    printf("\n5. Exit");
+    printf("\nEnter your choice: ");
+}
+
+int main() {
+    Queue issued;
+    Stack returned;
+    char title[TITLE_LEN];
+    int choice;
+
+    initQueue(&issued);
+    initStack(&returned);
+
+    do {
+        menu();
+        scanf("%d", &choice);
+        getchar(); // consume newline
+
+        switch (choice) {
+            case 1:
+                printf("\nEnter book title to issue: ");
+                fgets(title, TITLE_LEN, stdin);
+                title[strcspn(title, "\n")] = '\0'; // remove newline
+                enqueue(&issued, title);
+                break;
+
+            case 2:
+                printf("\nEnter book title to return: ");
+                fgets(title, TITLE_LEN, stdin);
+                title[strcspn(title, "\n")] = '\0';
+                push(&returned, title);
+                break;
+
+            case 3:
+                displayQueue(&issued);
+                break;
+
+            case 4:
+                displayStack(&returned);
+                break;
+
+            case 5:
+                printf("\nExiting Library System. Goodbye!\n");
+                break;
+
+            default:
+                printf("\nInvalid choice! Please try again.\n");
         }
-      }
-    }
-  </script>
-</body>
-</html>
+    } while (choice != 5);
+
+    return 0;
+}
